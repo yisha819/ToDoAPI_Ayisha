@@ -1,4 +1,3 @@
-import { TTodo, TTodoUpdateOptions } from "../models/todo.model";
 import TodoRepo from "../repositories/todo.repository";
 
 export default class TodoSvc {

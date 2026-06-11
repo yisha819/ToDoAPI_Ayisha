@@ -1,8 +1,6 @@
-// src/app.ts
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import { connectToMongo } from "./utils/mongo";
 import router from "./routes";
 import { isDev } from "./config";
 import setup from "./setup";
@@ -35,6 +33,12 @@ if (!isDev) app.use(limiter);
 app.use(helmet());
 app.disable("x-powered-by");
 
+app.get("/", (_, res) => {
+  res.json({
+    message: "Working",
+  });
+});
+
 // Use router for routing
 app.use("/api", router);
 
@@ -52,14 +56,5 @@ import events from "./events";
 
 events(io);
 
-// Connect to MongoDB
-connectToMongo()
-  .then(() => {
-    // Run setup
-    setup();
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
+setup();
 export default server;
