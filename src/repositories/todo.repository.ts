@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+// src/repositories/todo.repository.ts
+import { prisma } from "../app";
 
 type TTodoCreate = { title: string; description: string };
 type TTodoUpdate = { _id: string; title: string; description: string; status?: string };

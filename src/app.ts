@@ -1,3 +1,4 @@
+// src/app.ts
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -7,6 +8,12 @@ import setup from "./setup";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import events from "./events";
+
+// Prisma 7 Adapter Imports
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const app = express();
 
@@ -33,12 +40,6 @@ if (!isDev) app.use(limiter);
 app.use(helmet());
 app.disable("x-powered-by");
 
-app.get("/", (_, res) => {
-  res.json({
-    message: "Working",
-  });
-});
-
 // Use router for routing
 app.use("/api", router);
 
@@ -52,9 +53,29 @@ export const io = new Server(server, {
   },
 });
 
-import events from "./events";
-
 events(io);
 
-setup();
+// 1. Establish the connection pool for PostgreSQL
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL
+});
+
+// 2. Wrap the pool in the Prisma Adapter
+const adapter = new PrismaPg(pool);
+
+// 3. Initialize and EXPORT Prisma Client
+export const prisma = new PrismaClient({ adapter });
+
+// Connect to PostgreSQL via Prisma
+prisma.$connect()
+  .then(() => {
+    console.log("Successfully connected to PostgreSQL via Prisma 7 Adapter.");
+    // Run setup
+    setup();
+  })
+  .catch((err: any) => { // Added ': any' to explicitly declare the type
+    console.error("Failed to connect to the database:", err);
+    process.exit(1); 
+  });
+
 export default server;

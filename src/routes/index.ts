@@ -1,5 +1,6 @@
+// src/routes/index.ts
 import express from "express";
-import todoRouter from "./todo.route";
+import todoRoutes from "./todo.route";
 
 const router = express.Router();
 
@@ -9,10 +10,7 @@ router.get("/v1", (_, res) => {
   });
 });
 
-router.get("/v1/todo", (_, res) => {
-  res.json({
-    message: "todo",
-  });
-});
+// Mount the todo routes
+router.use("/todos", todoRoutes);
 
 export default router;
